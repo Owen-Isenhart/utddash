@@ -129,46 +129,6 @@
 
 ---
 
-## Core System Design
-
-### Users Table
-* id
-* email (@utdallas.edu only)
-* hashed_password
-* role (buyer/provider/both)
-* rating
-* payment_handle
-* created_at
-
-### Orders Table
-* id
-* buyer_id
-* provider_id (nullable until accepted)
-* location
-* items (JSON)
-* price
-* status
-* qr_token_hash
-* qr_token_expiration
-* timestamps
-
-### Messages Table
-* id
-* order_id
-* sender_id
-* content
-* created_at
-
-### Ratings Table
-* id
-* order_id
-* reviewer_id
-* reviewee_id
-* rating
-* comment
-
----
-
 ## Timeline  
 *(Subject to change)*
 
@@ -287,3 +247,8 @@ git add .
 git commit -m "Implement QR token generation and validation"
 git push origin qr_code
 ```
+
+---
+
+## Resources
+still need to find
