@@ -247,6 +247,11 @@ git add .
 git commit -m "Implement QR token generation and validation"
 git push origin qr_code
 ```
+### Then:
+* Open Pull Request on GitHub
+* Await review
+* Address feedback if needed
+* Project lead merges into main
 
 ---
 
