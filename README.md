@@ -4,7 +4,7 @@
 * **UTDDash** is a peer-to-peer marketplace exclusively for the University of Texas at Dallas. It connects students with extra meal swipes to students who want food at a discount.
 * Students with unused swipes (that would otherwise go to waste) can accept delivery requests and earn cash.
 * Students without meal plans can request food from on-campus dining locations at a discounted price.
-* Think DoorDash — but powered by meal swipes and limited to the UTD community.
+* Think DoorDash but powered by meal swipes and limited to the UTD community.
 * To prevent fraud and false delivery confirmations, UTDDash uses a **QR code handshake system** to validate in-person delivery.
 
 ---
