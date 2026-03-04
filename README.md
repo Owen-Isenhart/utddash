@@ -201,3 +201,89 @@
     * Containerization (Docker)
     * Deployment to AWS
     * Final documentation & demo
+
+---
+
+## Branching Rules
+
+* **Main Branch**
+    * `main` must always remain stable and deployable
+    * No direct commits to `main`
+    * Only merged via approved Pull Requests
+
+* **Creating a Feature Branch**
+    * Every feature must be developed on a new branch created from `main`
+    * Branch naming convention:
+
+        ```
+        feature_name
+        ```
+
+    * Examples:
+        ```
+        qr_code
+        auth_jwt
+        order_lifecycle
+        rating_system
+        websocket_notifications
+        ```
+
+* **How to Create a Branch**
+    ```bash
+    git checkout main
+    git pull origin main
+    git checkout -b qr_code
+    ```
+
+---
+
+## Development Process
+
+1. Create a new branch from `main`
+2. Implement the feature completely on that branch
+3. Push branch to GitHub
+4. Open a Pull Request (PR) into `main`
+
+---
+
+## Pull Request Rules
+
+* All features must be submitted via **Pull Request**
+* PR must include:
+    * Clear description of the feature
+    * Summary of changes made
+    * Any database/schema changes
+    * Screenshots (if frontend-related)
+    * Notes on testing performed
+
+* Example PR title:
+    ```
+    Add QR Code Delivery Handshake
+    ```
+
+---
+
+## Review & Merge Process
+
+* The project lead (repo owner) will:
+    * Review the code
+    * Request changes if necessary
+    * Approve once standards are met
+* Only the project lead merges into `main`
+* No self-merging
+
+---
+
+## Example Workflow (QR Code Feature)
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b qr_code
+
+# develop feature
+
+git add .
+git commit -m "Implement QR token generation and validation"
+git push origin qr_code
+```
