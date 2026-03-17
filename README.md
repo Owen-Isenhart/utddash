@@ -109,20 +109,20 @@
 
 ## Tech Stack
 
-* **API:** Node.js + Express
+* **API:** Python + FastAPI
 * **DB:** PostgreSQL
-* **ORM:** Prisma or Drizzle
-* **WebSockets:** Socket.io
-* **Auth:** JWT
-* **QR Code Generation:** `qrcode` (Node library)
+* **ORM:** SQLAlchemy or SQLModel
+* **WebSockets:** FastAPI WebSockets
+* **Auth:** JWT (PyJWT / python-jose)
+* **QR Code Generation:** `qrcode` (Python library)
 * **QR Code Scanning:** `react-qr-reader` (Frontend)
 * **Payments (Future):** Stripe Connect
 * **Storage:** AWS S3 (profile pictures)
 * **Deployment:** AWS (EC2 + RDS)
-* **Documentation:** Swagger / OpenAPI
+* **Documentation:** OpenAPI (built into FastAPI)
 * **Testing:**
-    * Jest (unit tests)
-    * Supertest (API testing)
+    * Pytest (unit tests)
+    * HTTPX / FastAPI TestClient (API testing)
     * Postman (manual testing)
 * **Frontend:** Next.js + Tailwind CSS
 * **State Management:** React Query or Zustand
@@ -134,7 +134,7 @@
 
 * **Week 1:**
     * PostgreSQL schema design
-    * Express server setup
+    * FastAPI server setup
     * Authentication implementation
 
 * **Week 2:**
@@ -143,7 +143,7 @@
     * Token generation & validation endpoints
 
 * **Week 3:**
-    * Real-time features (Socket.io)
+    * Real-time features (WebSockets)
     * 1-to-1 messaging
     * QR scanner frontend integration
 
@@ -160,7 +160,7 @@
 * **Week 6:**
     * Containerization (Docker)
     * Deployment to AWS
-    * Final documentation & demo
+    * Presentation Prep
 
 ---
 
@@ -256,4 +256,19 @@ git push origin qr_code
 ---
 
 ## Resources
-still need to find
+*I've tried to find the shortest, most to the point videos because I know tiktok has rotted your brain*
+### Everyone Should Watch:
+* [System Design](https://www.youtube.com/watch?v=BTjxUS_PylA)
+* [Rest APIs](https://www.youtube.com/watch?v=-mN3VyJuCjM)
+* [Git Intro](https://www.youtube.com/watch?v=e9lnsKot_SQ)
+
+### More Specific Videos
+* [DB Design](https://www.youtube.com/watch?v=5RpUmDEsn1k)
+* [FastAPI Intro](https://www.youtube.com/watch?v=umbU5Pk03CM)
+* [FastAPI Best Practices](https://www.youtube.com/watch?v=Af6Zr0tNNdE)
+* [Websockets Example pt 1](https://www.youtube.com/watch?v=wgontWHx4jw)
+* [Websockets Example pt 2](https://www.youtube.com/watch?v=FRdRfqxmZ84)
+* [JWT Auth](https://www.youtube.com/watch?v=I11jbMOCY0c)
+* [AWS EC2](https://www.youtube.com/watch?v=T-Pum2TraX4)
+* [AWS RDS](https://www.youtube.com/watch?v=I_fTQTsz2nQ)
+
