@@ -28,6 +28,15 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+# schema for updating user info (all fields optional)
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    role: Optional[UserRole] = None
+    venmo_handle: Optional[str] = None
+    cashapp_handle: Optional[str] = None
+    zelle_handle: Optional[str] = None
+
+
 # schema for returning user data (excludes sensitive info)
 class User(UserBase):
     id: int
@@ -38,3 +47,4 @@ class User(UserBase):
 
     class Config:
         from_attributes = True # Allows Pydantic to read from SQLAlchemy models
+        
