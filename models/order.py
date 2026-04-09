@@ -22,7 +22,7 @@ class Order(Base):
     # order details
     location = Column(String, nullable=False)
     items = Column(Text, nullable=False)
-    deliveryInstructions = Column(Text, nullable=True)
+    delivery_instructions = Column(Text, nullable=True)
 
     max_price = Column(Float, nullable=False)
     agreed_price = Column(Float, nullable=True) # Set when provider accepts the order
