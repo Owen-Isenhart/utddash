@@ -11,8 +11,8 @@ class Rating(Base):
     rater_id = Column(Integer, ForeignKey("users.id"), nullable=False) # The user who gives the rating
     ratee_id = Column(Integer, ForeignKey("users.id"), nullable=False) # The user who receives the rating
 
-    score = Column(Integer, nullable=False) 
-    review_text = Column(Text, nullable=True)
+    rating = Column(Integer, nullable=False) 
+    comment = Column(Text, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
