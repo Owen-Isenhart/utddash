@@ -1,3 +1,3 @@
-from .user import User, UserCreate, UserUpdate
-from .order import Order, OrderCreate
-from .rating import RatingCreate
+from .user import User, UserCreate, UserUpdate, UserRole
+from .order import Order, OrderCreate, OrderUpdate, OrderStatus
+from .rating import Rating, RatingCreate
