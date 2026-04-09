@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
@@ -11,7 +11,7 @@ class Rating(Base):
     rater_id = Column(Integer, ForeignKey("users.id"), nullable=False) # The user who gives the rating
     ratee_id = Column(Integer, ForeignKey("users.id"), nullable=False) # The user who receives the rating
 
-    score = Column(Float, nullable=False) # e.g. 1.0 to 5.0
+    score = Column(Integer, nullable=False) 
     review_text = Column(Text, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
