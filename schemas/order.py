@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 from pydantic import BaseModel
 from enum import Enum
@@ -30,8 +31,8 @@ class Order(OrderBase):
     provider_id: Optional[int] = None
     status: OrderStatus
     agreed_price: Optional[float] = None
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
