@@ -1,8 +1,16 @@
 from datetime import datetime
+import enum
+
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum, Text, DateTime
 from sqlalchemy.orm import relationship
+<<<<<<< HEAD
 from backend.app.database import Base
 import enum
+=======
+
+from backend.app.database import Base
+
+>>>>>>> 6f8a4b6 (Edited backend structure with models and schema)
 
 class OrderStatus(str, enum.Enum):
     REQUESTED = "requested"
@@ -11,13 +19,14 @@ class OrderStatus(str, enum.Enum):
     DELIVERED = "delivered"
     COMPLETED = "completed"
 
+
 class Order(Base):
     __tablename__ = "orders"
 
-    # identity and auth
+    # identity
     id = Column(Integer, primary_key=True, index=True)
     buyer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    provider_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Assigned when provider accepts the order
+    provider_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     # order details
     location = Column(String, nullable=False)
@@ -25,23 +34,23 @@ class Order(Base):
     delivery_instructions = Column(Text, nullable=True)
 
     max_price = Column(Float, nullable=False)
-    agreed_price = Column(Float, nullable=True) # Set when provider accepts the order
+    agreed_price = Column(Float, nullable=True)
 
-    # order status
+    # status
     status = Column(Enum(OrderStatus), default=OrderStatus.REQUESTED, nullable=False)
 
-    # timing 
+    # timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     delivery_time = Column(DateTime, nullable=True)
 
-    # QR code
-    qr_token = Column(String, unique=True, nullable=True) # Generated when provider accepts the order
-    qr_expiration = Column(DateTime, nullable=True) # Set to a short time window after acceptance
+    # QR / verification
+    qr_token = Column(String, unique=True, nullable=True)
+    qr_expiration = Column(DateTime, nullable=True)
 
-    # relationship
+    # relationships
     buyer = relationship("User", back_populates="orders_as_buyer", foreign_keys=[buyer_id])
     provider = relationship("User", back_populates="orders_as_provider", foreign_keys=[provider_id])
-    messages = relationship("Message", back_populates="order")
 
+    messages = relationship("Message", back_populates="order")
     ratings = relationship("Rating", back_populates="order")
