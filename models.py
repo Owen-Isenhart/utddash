@@ -1,13 +1,9 @@
-from datetime import datetime
-from typing import Optional
-from sqlmodel import SQLModel, Field
+from sqlalchemy import Column, Integer, String, DateTime
+from database import Base
 
-class Order(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    customer_id: str
-    dasher_id: Optional[str] = None
-    status: str = "pending" # pending -> arrived -> completed
-    
-    # Handshake logic fields
-    handshake_code: Optional[str] = None
-    handshake_expires_at: Optional[datetime] = None
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(Integer, primary_key=True, index=True)
+    status = Column(String, default="Pending")
+    qr_token = Column(String, nullable=True)
+    qr_token_expiry = Column(DateTime, nullable=True)

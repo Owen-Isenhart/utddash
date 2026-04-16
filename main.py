@@ -1,38 +1,32 @@
-import qrcode
-import io
-import base64
-import uuid
-from datetime import datetime, timedelta
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware # 1. Import the middleware
+import models, database
+from routers import orders
+from sqlalchemy.orm import Session
+
+models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
-# HELPER: This turns text into a QR image string
-def get_qr_b64(content: str):
-    qr = qrcode.make(content)
-    buf = io.BytesIO()
-    qr.save(buf, format="PNG")
-    return base64.b64encode(buf.getvalue()).decode()
+# 2. Add the middleware configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], # Allow your Next.js app
+    allow_credentials=True,
+    allow_methods=["*"], # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"], # Allow all headers
+)
 
-# 1. DASHER ARRIVES
-@app.post("/orders/{order_id}/arrive")
-async def mark_arrived(order_id: int):
-    # In a real app, you'd fetch from DB here. 
-    # For now, we generate a secret 'handshake'
-    secret = str(uuid.uuid4())[:8] # Shortened for easy reading
-    
-    qr_image = get_qr_b64(secret)
-    
-    return {
-        "status": "arrived",
-        "handshake_code": secret,
-        "qr_code_base64": f"data:image/png;base64,{qr_image}"
-    }
+app.include_router(orders.router)
 
-# 2. CUSTOMER SCANS
-@app.post("/orders/{order_id}/confirm")
-async def confirm_order(order_id: int, scanned_code: str):
-    # Here, you would check if scanned_code == DB's handshake_code
-    if scanned_code: 
-        return {"message": "Delivery Confirmed!", "payout": "released"}
-    raise HTTPException(status_code=400, detail="Invalid code")
+@app.get("/")
+def read_root():
+    return {"message": "UTDDash API is running"}
+
+@app.post("/setup-test")
+def setup_test(db: Session = Depends(database.get_db)):
+    # This creates the order that your frontend is looking for
+    new_order = models.Order(id=1, status="Pending")
+    db.add(new_order)
+    db.commit()
+    return {"message": "Order #1 created! You can now test the QR code."}
