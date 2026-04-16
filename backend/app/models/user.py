@@ -1,7 +1,7 @@
 import enum
 from sqlalchemy import Column, Integer, String, Boolean, Enum, Float, Text
 from sqlalchemy.orm import relationship
-from app.database import Base
+from backend.app.database import Base
 
 class UserRole(str, enum.Enum):
     PROVIDER = "provider"

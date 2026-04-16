@@ -2,18 +2,16 @@ from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import APIRouter, HTTPException, Depends
-from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRATION
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-
-from app.database import get_db
 from sqlalchemy.orm import Session
-from app.models import User
-from app.schemas import UserCreate, User as UserSchema, Token
+
+from backend.app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRATION
+from backend.app.database import get_db
+from backend.app.models.user import User
+from backend.app.schemas.user import UserCreate, User as UserSchema, Token
 
 router = APIRouter()
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str):
@@ -30,11 +28,9 @@ def create_access_token(data: dict):
 
 @router.post("/register", response_model=UserSchema)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    #check is user exists
     existing = db.query(User).filter(User.email == user.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
-    
     new_user = User(
         email=user.email,
         hashed_password=hash_password(user.password),
@@ -54,7 +50,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     db_user = db.query(User).filter(User.email == form_data.username).first()
     if not db_user or not verify_password(form_data.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    
     access_token = create_access_token(data={"sub": db_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -66,7 +61,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             raise HTTPException(status_code=401, detail="Invalid token")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
-
     user = db.query(User).filter(User.email == email).first()
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")

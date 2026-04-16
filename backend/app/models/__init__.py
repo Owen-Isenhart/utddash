@@ -1,4 +1,4 @@
-from app.database import Base
+from backend.app.database import Base
 from .user import User
 from .order import Order
 from .rating import Rating
