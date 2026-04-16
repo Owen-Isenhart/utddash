@@ -1,12 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from backend.app.schemas import UserRegister
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRATION
-from fastapi.security import OAuth2PasswordBearer
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from app.database import get_db
 from sqlalchemy.orm import Session
@@ -32,7 +29,7 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 @router.post("/register", response_model=UserSchema)
-def register(user: UserRegister, db: Session = Depends(get_db)):
+def register(user: UserCreate, db: Session = Depends(get_db)):
     #check is user exists
     existing = db.query(User).filter(User.email == user.email).first()
     if existing:
