@@ -69,3 +69,4 @@ def read_users_me(current_user: dict = Depends(get_current_user)):
         "email": current_user["email"],
         "role": current_user["role"]
     }
+
