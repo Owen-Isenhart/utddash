@@ -36,3 +36,4 @@ class User(Base):
     # Relationships
     orders_as_buyer = relationship("Order", back_populates="buyer", foreign_keys="[Order.buyer_id]")
     orders_as_provider = relationship("Order", back_populates="provider", foreign_keys="[Order.provider_id]")
+    notifications = relationship("Notification", back_populates="user")

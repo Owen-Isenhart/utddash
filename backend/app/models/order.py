@@ -42,5 +42,6 @@ class Order(Base):
     # relationship
     buyer = relationship("User", back_populates="orders_as_buyer", foreign_keys=[buyer_id])
     provider = relationship("User", back_populates="orders_as_provider", foreign_keys=[provider_id])
+    messages = relationship("Message", back_populates="order")
 
     ratings = relationship("Rating", back_populates="order")
