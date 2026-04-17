@@ -3,14 +3,9 @@ import enum
 
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum, Text, DateTime
 from sqlalchemy.orm import relationship
-<<<<<<< HEAD
-from backend.app.database import Base
-import enum
-=======
 
 from backend.app.database import Base
 
->>>>>>> 6f8a4b6 (Edited backend structure with models and schema)
 
 class OrderStatus(str, enum.Enum):
     REQUESTED = "requested"
