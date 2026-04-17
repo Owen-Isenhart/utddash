@@ -38,7 +38,7 @@ class UserUpdate(BaseModel):
 
 
 # schema for returning user data (excludes sensitive info)
-class User(UserBase):
+class UserResponse(UserBase):
     id: int
     is_verified: bool = False
     rating_avg: float = 0.0
