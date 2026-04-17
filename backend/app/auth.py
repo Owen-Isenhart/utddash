@@ -5,29 +5,19 @@ from passlib.context import CryptContext
 
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-<<<<<<< HEAD
-from sqlalchemy.orm import Session
-
-from backend.app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRATION
-from backend.app.database import get_db
-from backend.app.models.user import User
-from backend.app.schemas.user import UserCreate, User as UserSchema, Token
-=======
 
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
 from backend.app.models.user import User
-from backend.app.schemas.user import UserCreate, UserResponse
-from backend.app.schemas.user import UserLogin
-from backend.app.schemas.user import Token
-
+from backend.app.schemas.user import UserCreate, UserResponse, Token
 from backend.app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRATION
 
->>>>>>> 6f8a4b6 (Edited backend structure with models and schema)
 
 router = APIRouter()
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -51,10 +41,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == user.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
-<<<<<<< HEAD
-=======
 
->>>>>>> 6f8a4b6 (Edited backend structure with models and schema)
     new_user = User(
         email=user.email,
         name=user.name,
@@ -72,13 +59,6 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == form_data.username).first()
-<<<<<<< HEAD
-    if not db_user or not verify_password(form_data.password, db_user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    access_token = create_access_token(data={"sub": db_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
-=======
->>>>>>> 6f8a4b6 (Edited backend structure with models and schema)
 
     if not db_user or not verify_password(form_data.password, db_user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -104,6 +84,7 @@ def get_current_user(
 
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
     user = db.query(User).filter(User.email == email).first()
 
     if user is None:
