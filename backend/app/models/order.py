@@ -42,6 +42,14 @@ class Order(Base):
     # QR / verification
     qr_token = Column(String, unique=True, nullable=True)
     qr_expiration = Column(DateTime, nullable=True)
+    qr_verified_at = Column(DateTime, nullable=True)
+
+    # Demo-only map data provided by client interactions
+    provider_lat = Column(Float, nullable=True)
+    provider_lng = Column(Float, nullable=True)
+    buyer_lat = Column(Float, nullable=True)
+    buyer_lng = Column(Float, nullable=True)
+    route_geojson = Column(Text, nullable=True)
 
     # relationships
     buyer = relationship("User", back_populates="orders_as_buyer", foreign_keys=[buyer_id])

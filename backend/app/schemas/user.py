@@ -31,6 +31,7 @@ class UserCreate(UserBase):
 # schema for updating user info (all fields optional)
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
+    bio: Optional[str] = None
     role: Optional[UserRole] = None
     venmo_handle: Optional[str] = None
     cashapp_handle: Optional[str] = None
@@ -44,6 +45,10 @@ class UserResponse(UserBase):
     rating_avg: float = 0.0
     total_earnings: float = 0.0
     total_savings: float = 0.0
+    token_balance: float = 0.0
+    current_lat: Optional[float] = None
+    current_lng: Optional[float] = None
+    bio: Optional[str] = None
 
     class Config:
         from_attributes = True # Allows Pydantic to read from SQLAlchemy models
@@ -51,4 +56,13 @@ class UserResponse(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class TokenBalanceUpdate(BaseModel):
+    token_balance: float
+
+
+class UserLocationUpdate(BaseModel):
+    lat: float
+    lng: float
         

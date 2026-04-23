@@ -5,12 +5,13 @@ class MessageBase(BaseModel):
     content: str
 
 class MessageCreate(MessageBase):
-    order_id: int
+    pass
 
 class Message(MessageBase):
     id: int
     order_id: int
-    sender_id: int
+    buyer_id: int
+    provider_id: int
     created_at: datetime
 
     class Config:

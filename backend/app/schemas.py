@@ -1,8 +1,20 @@
-from datetime import datetime
-from typing import Optional
 from pydantic import BaseModel, Field
+from typing import Optional
+from datetime import datetime
 from enum import Enum
 
+class UserRegister(BaseModel):
+    email: str
+    password: str
+    role: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
 class OrderStatus(str, Enum):
     REQUESTED = "requested"
@@ -15,7 +27,7 @@ class OrderBase(BaseModel):
     location: str
     items: str
     delivery_instructions: Optional[str] = None
-    max_price: float = Field(..., gt=0)
+    max_price: float
     delivery_time: Optional[datetime] = None
 
 class OrderCreate(OrderBase):
@@ -31,33 +43,26 @@ class Order(OrderBase):
     provider_id: Optional[int] = None
     status: OrderStatus
     agreed_price: Optional[float] = None
-    qr_token: Optional[str] = None
-    qr_expiration: Optional[datetime] = None
-    qr_verified_at: Optional[datetime] = None
-    provider_lat: Optional[float] = None
-    provider_lng: Optional[float] = None
-    buyer_lat: Optional[float] = None
-    buyer_lng: Optional[float] = None
-    route_geojson: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
 
+class RatingBase(BaseModel):
+    rating: int = Field(..., ge=1, le=5) # Rating must be between 1 and 5
+    comment: Optional[str] = None
 
-class OrderAcceptRequest(BaseModel):
-    agreed_price: Optional[float] = Field(default=None, gt=0)
+class RatingCreate(RatingBase):
+    order_id: int
+    ratee_id: int
 
+class Rating(RatingBase):
+    id: int
+    order_id: int
+    rater_id: int
+    ratee_id: int
+    created_at: datetime
 
-class QrValidateRequest(BaseModel):
-    qr_token: str
-
-
-class OrderLocationUpdate(BaseModel):
-    lat: float
-    lng: float
-
-
-class OrderRouteUpdate(BaseModel):
-    route_geojson: str
+    class Config:
+        from_attributes = True
