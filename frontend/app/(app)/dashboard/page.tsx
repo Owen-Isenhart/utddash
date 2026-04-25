@@ -6,6 +6,7 @@ import { queryKeys } from "@/lib/query-keys";
 import type { Notification, Order } from "@/lib/types";
 import { notificationsApi, ordersApi } from "@/lib/api-client";
 import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -23,52 +24,62 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {user?.full_name}</h1>
-        <p className="text-sm text-slate-600">Role: {user?.role} • Token balance: {user?.token_balance.toFixed(2)}</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome back, {user?.full_name}</h1>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <Badge variant="brand" className="uppercase tracking-wide">{user?.role}</Badge>
+          <span>Token balance: <strong className="text-foreground">{user?.token_balance.toFixed(2)}</strong></span>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <SectionCard title="Earnings" description="Provider revenue">
-          <p className="text-2xl font-semibold text-slate-900">${(user?.total_earnings ?? 0).toFixed(2)}</p>
+          <p className="text-3xl font-bold text-foreground">${(user?.total_earnings ?? 0).toFixed(2)}</p>
         </SectionCard>
         <SectionCard title="Savings" description="Buyer savings">
-          <p className="text-2xl font-semibold text-slate-900">${(user?.total_savings ?? 0).toFixed(2)}</p>
+          <p className="text-3xl font-bold text-foreground">${(user?.total_savings ?? 0).toFixed(2)}</p>
         </SectionCard>
         <SectionCard title="Rating" description="Current average">
-          <p className="text-2xl font-semibold text-slate-900">{(user?.rating_avg ?? 0).toFixed(2)} / 5</p>
+          <p className="text-3xl font-bold text-foreground">{(user?.rating_avg ?? 0).toFixed(2)} <span className="text-muted-foreground text-lg font-normal">/ 5</span></p>
         </SectionCard>
       </div>
 
-      <SectionCard title="Recent Orders">
-        {myOrders.isLoading ? <p className="text-sm text-slate-500">Loading orders...</p> : null}
-        {myOrders.data?.length ? (
-          <ul className="space-y-2">
-            {myOrders.data.map((order) => (
-              <li key={order.id} className="rounded-lg border border-slate-200 px-3 py-2">
-                <p className="text-sm font-semibold text-slate-800">#{order.id} • {order.location}</p>
-                <p className="text-sm text-slate-600">{order.status} • ${order.agreed_price ?? order.max_price}</p>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </SectionCard>
+      <div className="grid gap-6 md:grid-cols-2">
+        <SectionCard title="Recent Orders">
+          {myOrders.isLoading ? <p className="text-sm text-muted-foreground">Loading orders...</p> : null}
+          {myOrders.data?.length ? (
+            <ul className="space-y-3">
+              {myOrders.data.map((order) => (
+                <li key={order.id} className="rounded-xl border border-border bg-surface-2/50 px-4 py-3 flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold text-foreground">#{order.id} • {order.location}</p>
+                    <p className="text-sm text-muted-foreground">${order.agreed_price ?? order.max_price}</p>
+                  </div>
+                  <Badge variant={order.status === "delivered" ? "default" : "brand"}>{order.status}</Badge>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">No recent orders.</p>
+          )}
+        </SectionCard>
 
-      <SectionCard title="Latest Notifications">
-        {notifications.isLoading ? <p className="text-sm text-slate-500">Loading notifications...</p> : null}
-        {notifications.data?.length ? (
-          <ul className="space-y-2">
-            {notifications.data.map((notification) => (
-              <li key={notification.id} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                {notification.message}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-slate-500">No notifications yet.</p>
-        )}
-      </SectionCard>
+        <SectionCard title="Latest Notifications">
+          {notifications.isLoading ? <p className="text-sm text-muted-foreground">Loading notifications...</p> : null}
+          {notifications.data?.length ? (
+            <ul className="space-y-3">
+              {notifications.data.map((notification) => (
+                <li key={notification.id} className="rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-sm text-foreground">
+                  {notification.message}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">No notifications yet.</p>
+          )}
+        </SectionCard>
+      </div>
     </div>
   );
 }

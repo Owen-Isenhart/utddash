@@ -5,6 +5,8 @@ import { SectionCard } from "@/components/ui/section-card";
 import { profileApi } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type ProfilePayload = {
   full_name: string;
@@ -27,16 +29,21 @@ export default function ProfilePage() {
   });
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-slate-900">Profile</h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile</h1>
+      </div>
 
-      <SectionCard title="Account">
-        <p className="text-sm text-slate-600">{user?.email}</p>
+      <SectionCard title="Account Details" description="Your authenticated identity">
+        <div className="rounded-xl border border-border bg-surface-2 p-4">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Email Address</p>
+          <p className="font-semibold text-foreground">{user?.email}</p>
+        </div>
       </SectionCard>
 
-      <SectionCard title="Edit profile">
+      <SectionCard title="Edit Profile" description="Update your public information and payment handles">
         <form
-          className="grid gap-3 md:grid-cols-2"
+          className="grid gap-4 md:grid-cols-2"
           onSubmit={(event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
@@ -50,48 +57,47 @@ export default function ProfilePage() {
             });
           }}
         >
-          <input
-            name="full_name"
-            defaultValue={user?.full_name || ""}
-            placeholder="Full name"
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          />
-          <select
-            name="role"
-            defaultValue={user?.role || "both"}
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          >
-            <option value="buyer">Buyer</option>
-            <option value="provider">Provider</option>
-            <option value="both">Both</option>
-          </select>
-          <input
-            name="venmo_handle"
-            defaultValue={user?.venmo_handle || ""}
-            placeholder="Venmo handle"
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          />
-          <input
-            name="cashapp_handle"
-            defaultValue={user?.cashapp_handle || ""}
-            placeholder="CashApp handle"
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          />
-          <input
-            name="zelle_handle"
-            defaultValue={user?.zelle_handle || ""}
-            placeholder="Zelle handle"
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          />
-          <input
-            name="bio"
-            defaultValue={user?.bio || ""}
-            placeholder="Bio"
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          />
-          <button type="submit" className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white md:col-span-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Full Name</label>
+            <Input name="full_name" defaultValue={user?.full_name || ""} placeholder="Full name" />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Role</label>
+            <select
+              name="role"
+              defaultValue={user?.role || "both"}
+              className="flex h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              <option value="buyer">Buyer</option>
+              <option value="provider">Provider</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Venmo Handle</label>
+            <Input name="venmo_handle" defaultValue={user?.venmo_handle || ""} placeholder="@username" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">CashApp Handle</label>
+            <Input name="cashapp_handle" defaultValue={user?.cashapp_handle || ""} placeholder="$cashtag" />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-medium text-foreground">Zelle Info</label>
+            <Input name="zelle_handle" defaultValue={user?.zelle_handle || ""} placeholder="Phone or email" />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-medium text-foreground">Bio</label>
+            <Input name="bio" defaultValue={user?.bio || ""} placeholder="A short bio about yourself" />
+          </div>
+
+          <Button type="submit" className="md:col-span-2 mt-2" isLoading={saveMutation.isPending}>
             Save changes
-          </button>
+          </Button>
         </form>
       </SectionCard>
     </div>

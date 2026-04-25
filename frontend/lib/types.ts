@@ -53,6 +53,7 @@ export interface Message {
   order_id: number;
   buyer_id: number;
   provider_id: number;
+  sender_id: number;
   content: string;
   created_at: string;
 }

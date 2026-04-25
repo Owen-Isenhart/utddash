@@ -10,6 +10,9 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import { OrderMap } from "@/components/ui/order-map";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -22,15 +25,18 @@ export default function OrdersPage() {
     max_price: "",
   });
   const [qrInputs, setQrInputs] = useState<Record<number, string>>({});
+  const [scanningOrderId, setScanningOrderId] = useState<number | null>(null);
+  const [myOrdersLimit, setMyOrdersLimit] = useState(5);
+  const [openOrdersLimit, setOpenOrdersLimit] = useState(5);
 
   const myOrders = useQuery<Order[]>({
-    queryKey: queryKeys.myOrders(),
-    queryFn: () => ordersApi.listMine(),
+    queryKey: queryKeys.myOrders(myOrdersLimit, 0),
+    queryFn: () => ordersApi.listMine(myOrdersLimit, 0),
   });
 
   const openOrders = useQuery<Order[]>({
-    queryKey: queryKeys.openOrders(),
-    queryFn: () => ordersApi.listOpen(),
+    queryKey: queryKeys.openOrders(openOrdersLimit, 0),
+    queryFn: () => ordersApi.listOpen(openOrdersLimit, 0),
     enabled: user?.role === "provider" || user?.role === "both",
   });
 
@@ -108,133 +114,158 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
-      {error ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Orders</h1>
+      </div>
+      
+      {error ? <p className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-medium text-danger">{error}</p> : null}
 
       {(user?.role === "buyer" || user?.role === "both") && (
         <SectionCard title="Create Request" description="Post a new meal request for providers">
           <form
-            className="grid gap-3 md:grid-cols-2"
+            className="grid gap-4 md:grid-cols-2"
             onSubmit={(event) => {
               event.preventDefault();
               createMutation.mutate();
             }}
           >
-            <input
+            <Input
               value={createForm.location}
               onChange={(event) => setCreateForm((old) => ({ ...old, location: event.target.value }))}
               placeholder="Pickup location"
-              className="rounded-lg border border-slate-300 px-3 py-2"
               required
             />
-            <input
+            <Input
               value={createForm.max_price}
               onChange={(event) => setCreateForm((old) => ({ ...old, max_price: event.target.value }))}
               placeholder="Max price"
               type="number"
               step="0.01"
-              className="rounded-lg border border-slate-300 px-3 py-2"
               required
             />
-            <input
+            <Input
               value={createForm.items}
               onChange={(event) => setCreateForm((old) => ({ ...old, items: event.target.value }))}
               placeholder="Items requested"
-              className="rounded-lg border border-slate-300 px-3 py-2 md:col-span-2"
+              className="md:col-span-2"
               required
             />
-            <input
+            <Input
               value={createForm.delivery_instructions}
               onChange={(event) =>
                 setCreateForm((old) => ({ ...old, delivery_instructions: event.target.value }))
               }
               placeholder="Delivery instructions"
-              className="rounded-lg border border-slate-300 px-3 py-2 md:col-span-2"
+              className="md:col-span-2"
             />
-            <button
+            <Button
               type="submit"
-              disabled={createMutation.isPending}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-white md:col-span-2"
+              className="md:col-span-2"
+              isLoading={createMutation.isPending}
             >
-              {createMutation.isPending ? "Creating..." : "Create order"}
-            </button>
+              Create order
+            </Button>
           </form>
         </SectionCard>
       )}
 
-      <SectionCard title="My Orders" description="Orders where you are buyer or provider">
-        {myOrders.isLoading ? <p className="text-sm text-slate-500">Loading...</p> : null}
+      <div className="pt-2">
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">My Orders</h2>
+          <p className="text-sm text-muted-foreground">Orders where you are buyer or provider</p>
+        </div>
+        {myOrders.isLoading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
         {myOrders.data?.length ? (
-          <ul className="space-y-2">
+          <ul className="space-y-6">
             {myOrders.data.map((order) => (
-              <li key={order.id} className="rounded-lg border border-slate-200 px-3 py-2">
-                <p className="font-medium text-slate-900">#{order.id} • {order.location}</p>
-                <p className="text-sm text-slate-600">{order.status} • ${order.agreed_price ?? order.max_price}</p>
-                <p className="text-sm text-slate-600">{order.items}</p>
+              <li key={order.id} className="rounded-2xl border border-border bg-surface-2 p-5 shadow-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="font-bold text-lg text-foreground">#{order.id} • {order.location}</p>
+                    <p className="text-sm text-muted-foreground font-medium">${order.agreed_price ?? order.max_price}</p>
+                  </div>
+                  <Badge variant={order.status === "delivered" ? "default" : "brand"}>{order.status}</Badge>
+                </div>
+                <p className="text-foreground">{order.items}</p>
 
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-3">
                   {isProviderForOrder(order) && order.status === "accepted" && (
-                    <button
-                      type="button"
-                      className="rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white"
+                    <Button
+                      variant="primary"
                       onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: "in_progress" })}
-                      disabled={updateStatusMutation.isPending}
+                      isLoading={updateStatusMutation.isPending}
                     >
                       Start delivery
-                    </button>
+                    </Button>
                   )}
 
                   {isProviderForOrder(order) && order.status === "in_progress" && (
-                    <button
-                      type="button"
-                      className="rounded-lg bg-amber-700 px-3 py-1.5 text-sm font-semibold text-white"
+                    <Button
+                      variant="primary"
                       onClick={() => arriveMutation.mutate(order.id)}
-                      disabled={arriveMutation.isPending}
+                      isLoading={arriveMutation.isPending}
                     >
                       Mark arrived & generate QR
-                    </button>
+                    </Button>
                   )}
                 </div>
 
                 {(order.status === "accepted" || order.status === "in_progress" || order.status === "delivered") && (
-                  <OrderMap order={order} isProvider={isProviderForOrder(order)} />
+                  <div className="mt-4 overflow-hidden rounded-xl border border-border">
+                    <OrderMap order={order} isProvider={isProviderForOrder(order)} />
+                  </div>
                 )}
 
                 {isProviderForOrder(order) && order.status === "delivered" && order.qr_token && (
-                  <div className="mt-4 flex flex-col items-center rounded-lg bg-white p-4 shadow-sm border border-slate-200">
-                    <p className="mb-4 text-sm font-medium text-slate-700">
+                  <div className="mt-6 flex flex-col items-center rounded-xl bg-surface p-6 shadow-sm border border-border">
+                    <p className="mb-6 text-sm font-semibold text-foreground text-center">
                       Show this QR Code to the buyer to complete delivery
                     </p>
-                    <QRCodeSVG value={order.qr_token} size={200} />
-                    <p className="mt-4 text-xs text-slate-500 font-mono">
+                    <div className="p-4 bg-white rounded-xl">
+                      <QRCodeSVG value={order.qr_token} size={200} />
+                    </div>
+                    <p className="mt-6 text-xs text-muted-foreground font-mono bg-surface-2 px-3 py-1.5 rounded-lg">
                       Token fallback: {order.qr_token}
                     </p>
                   </div>
                 )}
 
                 {isBuyerForOrder(order) && order.status === "delivered" && (
-                  <div className="mt-4 space-y-4 rounded-lg bg-slate-50 p-4 border border-slate-200">
-                    <p className="text-sm font-medium text-slate-800">Scan Provider's QR Code</p>
-                    <div className="overflow-hidden rounded-lg border border-slate-300 bg-black max-w-sm mx-auto">
-                      <Scanner
-                        onScan={(result) => {
-                          if (result.length > 0 && result[0].rawValue && !validateQrMutation.isPending) {
-                            validateQrMutation.mutate({ orderId: order.id, token: result[0].rawValue });
-                          }
-                        }}
-                        allowMultiple={false}
-                      />
-                    </div>
+                  <div className="mt-6 space-y-5 rounded-xl bg-surface p-5 border border-border">
+                    {scanningOrderId === order.id ? (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <p className="font-semibold text-foreground text-center">Scan Provider&apos;s QR Code</p>
+                          <Button variant="ghost" size="sm" onClick={() => setScanningOrderId(null)}>Cancel</Button>
+                        </div>
+                        <div className="overflow-hidden rounded-xl border-2 border-brand/20 bg-black max-w-sm mx-auto shadow-sm">
+                          <Scanner
+                            onScan={(result) => {
+                              if (result.length > 0 && result[0].rawValue && !validateQrMutation.isPending) {
+                                validateQrMutation.mutate({ orderId: order.id, token: result[0].rawValue });
+                                setScanningOrderId(null);
+                              }
+                            }}
+                            allowMultiple={false}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3">
+                        <p className="font-semibold text-foreground text-center">Ready to complete delivery?</p>
+                        <Button onClick={() => setScanningOrderId(order.id)}>Open QR Scanner</Button>
+                      </div>
+                    )}
                     
-                    <div className="flex items-center gap-2">
-                      <div className="h-px flex-1 bg-slate-300"></div>
-                      <span className="text-xs text-slate-500 uppercase font-medium">Or enter token manually</span>
-                      <div className="h-px flex-1 bg-slate-300"></div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1 bg-border"></div>
+                      <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Or enter token manually</span>
+                      <div className="h-px flex-1 bg-border"></div>
                     </div>
 
                     <form
-                      className="flex flex-wrap gap-2"
+                      className="flex gap-2"
                       onSubmit={(event) => {
                         event.preventDefault();
                         const token = qrInputs[order.id] || "";
@@ -244,21 +275,21 @@ export default function OrdersPage() {
                         validateQrMutation.mutate({ orderId: order.id, token });
                       }}
                     >
-                      <input
+                      <Input
                         value={qrInputs[order.id] || ""}
                         onChange={(event) =>
                           setQrInputs((old) => ({ ...old, [order.id]: event.target.value }))
                         }
                         placeholder="Enter provider QR token"
-                        className="min-w-[220px] flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                        className="flex-1"
                       />
-                      <button
+                      <Button
                         type="submit"
-                        disabled={validateQrMutation.isPending}
-                        className="rounded-lg bg-indigo-700 px-3 py-1.5 text-sm font-semibold text-white"
+                        variant="primary"
+                        isLoading={validateQrMutation.isPending}
                       >
-                        Complete order
-                      </button>
+                        Complete
+                      </Button>
                     </form>
                   </div>
                 )}
@@ -266,34 +297,53 @@ export default function OrdersPage() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-slate-500">No orders yet.</p>
+          <p className="text-sm text-muted-foreground">No orders yet.</p>
         )}
-      </SectionCard>
+        {myOrders.data?.length === myOrdersLimit && (
+          <div className="mt-6 flex justify-center">
+            <Button variant="outline" onClick={() => setMyOrdersLimit((prev) => prev + 5)}>
+              Show more
+            </Button>
+          </div>
+        )}
+      </div>
 
       {openOrders.isSuccess ? (
-        <SectionCard title="Open Requests" description="Available to providers">
+        <div className="pt-2 border-t border-border">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">Open Requests</h2>
+            <p className="text-sm text-muted-foreground">Available to providers</p>
+          </div>
           {openOrders.data.length ? (
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {openOrders.data.map((order) => (
-                <li key={order.id} className="rounded-lg border border-slate-200 px-3 py-2">
-                  <p className="font-medium text-slate-900">#{order.id} • {order.location}</p>
-                  <p className="text-sm text-slate-600">{order.items}</p>
-                  <p className="text-sm text-slate-600">Max ${order.max_price}</p>
-                  <button
-                    type="button"
+                <li key={order.id} className="rounded-xl border border-border bg-surface-2 p-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                  <div>
+                    <p className="font-semibold text-foreground">#{order.id} • {order.location}</p>
+                    <p className="text-foreground mt-1">{order.items}</p>
+                    <p className="text-sm text-brand font-bold mt-1">Max ${order.max_price}</p>
+                  </div>
+                  <Button
                     onClick={() => acceptMutation.mutate(order.id)}
-                    disabled={acceptMutation.isPending}
-                    className="mt-2 rounded-lg bg-teal-700 px-3 py-1.5 text-sm font-semibold text-white"
+                    isLoading={acceptMutation.isPending}
+                    className="w-full sm:w-auto shrink-0"
                   >
                     Accept order
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-slate-500">No open requests right now.</p>
+            <p className="text-sm text-muted-foreground">No open requests right now.</p>
           )}
-        </SectionCard>
+          {openOrders.data?.length === openOrdersLimit && (
+            <div className="mt-6 flex justify-center">
+              <Button variant="outline" onClick={() => setOpenOrdersLimit((prev) => prev + 5)}>
+                Show more
+              </Button>
+            </div>
+          )}
+        </div>
       ) : null}
     </div>
   );

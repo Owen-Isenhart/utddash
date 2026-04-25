@@ -1,19 +1,23 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 export function SectionCard({
   title,
   description,
   children,
+  className,
 }: {
   title: string;
   description?: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-3">
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-        {description ? <p className="text-sm text-slate-600">{description}</p> : null}
-      </div>
-      {children}
-    </section>
+    <Card className={className}>
+      <CardHeader className="pb-3">
+        <CardTitle>{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }

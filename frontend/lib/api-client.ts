@@ -12,6 +12,7 @@ import type {
   UpdateOrderPayload,
   User,
 } from "@/lib/types";
+import { parseBackendError } from "@/lib/backend";
 
 interface ApiOptions extends RequestInit {
   skipJson?: boolean;
@@ -28,13 +29,7 @@ async function apiFetch<T>(path: string, init: ApiOptions = {}): Promise<T> {
   });
 
   if (!response.ok) {
-    let detail = `Request failed with status ${response.status}`;
-    try {
-      const payload = (await response.json()) as { detail?: string; message?: string };
-      detail = payload.detail || payload.message || detail;
-    } catch {
-      // Ignore parse errors.
-    }
+    const detail = await parseBackendError(response);
     throw new Error(detail);
   }
 
@@ -55,8 +50,8 @@ export const authApi = {
     });
 
     if (!response.ok) {
-      const data = (await response.json().catch(() => ({}))) as { detail?: string };
-      throw new Error(data.detail || "Unable to login");
+      const detail = await parseBackendError(response);
+      throw new Error(detail || "Unable to login");
     }
 
     return (await response.json()) as User;
@@ -71,8 +66,8 @@ export const authApi = {
     });
 
     if (!response.ok) {
-      const data = (await response.json().catch(() => ({}))) as { detail?: string };
-      throw new Error(data.detail || "Unable to register");
+      const detail = await parseBackendError(response);
+      throw new Error(detail || "Unable to register");
     }
 
     return (await response.json()) as User;

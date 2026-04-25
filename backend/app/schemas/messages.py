@@ -12,6 +12,7 @@ class Message(MessageBase):
     order_id: int
     buyer_id: int
     provider_id: int
+    sender_id: int
     created_at: datetime
 
     class Config:

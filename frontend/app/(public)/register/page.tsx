@@ -4,6 +4,9 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
   full_name: z.string().min(2, "Full name is required"),
@@ -38,62 +41,67 @@ export default function RegisterPage() {
   });
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#effaf5,#f7f4ea)] px-4 py-8">
-      <form onSubmit={onSubmit} className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-        <h1 className="text-2xl font-bold text-slate-900">Create your UTDDash account</h1>
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+      <Card className="w-full max-w-xl shadow-xl border-border">
+        <CardHeader>
+          <CardTitle className="text-2xl">Create your UTDDash account</CardTitle>
+          <CardDescription>Join the marketplace to buy or sell meal swipes.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2 space-y-2">
+                <label className="text-sm font-medium text-foreground">Full name</label>
+                <Input {...register("full_name")} error={!!errors.full_name} />
+                {errors.full_name && <p className="text-sm text-danger">{errors.full_name.message}</p>}
+              </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Full name</label>
-            <input {...register("full_name")} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
-            {errors.full_name ? <p className="mt-1 text-sm text-red-600">{errors.full_name.message}</p> : null}
-          </div>
+              <div className="sm:col-span-2 space-y-2">
+                <label className="text-sm font-medium text-foreground">UTD email</label>
+                <Input type="email" {...register("email")} error={!!errors.email} />
+                {errors.email && <p className="text-sm text-danger">{errors.email.message}</p>}
+              </div>
 
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">UTD email</label>
-            <input type="email" {...register("email")} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
-            {errors.email ? <p className="mt-1 text-sm text-red-600">{errors.email.message}</p> : null}
-          </div>
+              <div className="sm:col-span-2 space-y-2">
+                <label className="text-sm font-medium text-foreground">Password</label>
+                <Input type="password" {...register("password")} error={!!errors.password} />
+                {errors.password && <p className="text-sm text-danger">{errors.password.message}</p>}
+              </div>
 
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Password</label>
-            <input type="password" {...register("password")} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
-            {errors.password ? <p className="mt-1 text-sm text-red-600">{errors.password.message}</p> : null}
-          </div>
+              <div className="sm:col-span-2 space-y-2">
+                <label className="text-sm font-medium text-foreground">Role</label>
+                <select
+                  {...register("role")}
+                  className="flex h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                >
+                  <option value="buyer">Buyer</option>
+                  <option value="provider">Provider</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
 
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Role</label>
-            <select {...register("role")} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">
-              <option value="buyer">Buyer</option>
-              <option value="provider">Provider</option>
-              <option value="both">Both</option>
-            </select>
-          </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Venmo</label>
+                <Input {...register("venmo_handle")} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">CashApp</label>
+                <Input {...register("cashapp_handle")} />
+              </div>
+              <div className="sm:col-span-2 space-y-2">
+                <label className="text-sm font-medium text-foreground">Zelle</label>
+                <Input {...register("zelle_handle")} />
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700">Venmo</label>
-            <input {...register("venmo_handle")} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">CashApp</label>
-            <input {...register("cashapp_handle")} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Zelle</label>
-            <input {...register("zelle_handle")} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" />
-          </div>
-        </div>
+            {errors.root && <p className="mt-3 text-sm text-danger">{errors.root.message}</p>}
 
-        {errors.root ? <p className="mt-3 text-sm text-red-600">{errors.root.message}</p> : null}
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="mt-6 w-full rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white disabled:opacity-60"
-        >
-          {isSubmitting ? "Creating account..." : "Create account"}
-        </button>
-      </form>
+            <Button type="submit" className="w-full mt-6" isLoading={isSubmitting}>
+              Create account
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }

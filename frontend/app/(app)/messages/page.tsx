@@ -1,13 +1,16 @@
 "use client";
 
-import { SectionCard } from "@/components/ui/section-card";
 import { messagesApi, ordersApi } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import type { Message, Order } from "@/lib/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export default function MessagesPage() {
+  const { user } = useAuth();
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [content, setContent] = useState("");
 
@@ -36,12 +39,15 @@ export default function MessagesPage() {
   });
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Messages</h1>
+      </div>
 
-      <SectionCard title="Select an Order Chat">
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-semibold text-foreground">Select an Order Chat</label>
         <select
-          className="w-full rounded-lg border border-slate-300 px-3 py-2"
+          className="flex h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           value={selectedOrderId ?? ""}
           onChange={(event) => setSelectedOrderId(Number(event.target.value) || null)}
         >
@@ -52,29 +58,41 @@ export default function MessagesPage() {
             </option>
           ))}
         </select>
-      </SectionCard>
+      </div>
 
-      <SectionCard title="Conversation">
-        {selectedOrderId === null ? <p className="text-sm text-slate-500">Select an order to view chat.</p> : null}
+      <div className="flex flex-col flex-1 h-full min-h-[500px] border border-border rounded-2xl bg-surface p-4 shadow-sm">
+        {selectedOrderId === null ? <p className="text-sm text-muted-foreground">Select an order to view chat.</p> : null}
         {selectedOrderId !== null && messagesQuery.isLoading ? (
-          <p className="text-sm text-slate-500">Loading conversation...</p>
+          <p className="text-sm text-muted-foreground">Loading conversation...</p>
         ) : null}
         {messagesQuery.data?.length ? (
-          <ul className="max-h-80 space-y-2 overflow-y-auto">
-            {messagesQuery.data.map((message) => (
-              <li key={message.id} className="rounded-lg border border-slate-200 p-2 text-sm">
-                <p className="text-slate-800">{message.content}</p>
-                <p className="text-xs text-slate-500">{new Date(message.created_at).toLocaleString()}</p>
-              </li>
-            ))}
+          <ul className="flex-1 space-y-4 overflow-y-auto pr-2 mb-4 flex flex-col">
+            {messagesQuery.data.map((message) => {
+              const isMine = user && message.sender_id === user.id;
+              return (
+                <li 
+                  key={message.id} 
+                  className={`rounded-2xl p-4 text-sm w-max max-w-[85%] ${
+                    isMine 
+                      ? "ml-auto bg-brand text-brand-contrast rounded-br-sm shadow-sm" 
+                      : "bg-surface-2 text-foreground rounded-bl-sm"
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className={`text-[10px] mt-1 font-medium opacity-80 ${isMine ? "text-brand-contrast" : "text-muted-foreground"}`}>
+                    {new Date(message.created_at).toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         ) : selectedOrderId !== null && !messagesQuery.isLoading ? (
-          <p className="text-sm text-slate-500">No messages yet for this order.</p>
+          <p className="text-sm text-muted-foreground">No messages yet for this order.</p>
         ) : null}
 
         {selectedOrderId !== null ? (
           <form
-            className="mt-3 flex gap-2"
+            className="mt-auto flex gap-3 pt-4 border-t border-border"
             onSubmit={(event) => {
               event.preventDefault();
               if (!content.trim()) {
@@ -83,18 +101,18 @@ export default function MessagesPage() {
               sendMutation.mutate();
             }}
           >
-            <input
+            <Input
               value={content}
               onChange={(event) => setContent(event.target.value)}
-              className="flex-1 rounded-lg border border-slate-300 px-3 py-2"
+              className="flex-1"
               placeholder="Type a message"
             />
-            <button type="submit" className="rounded-lg bg-slate-900 px-4 py-2 text-white">
+            <Button type="submit" isLoading={sendMutation.isPending}>
               Send
-            </button>
+            </Button>
           </form>
         ) : null}
-      </SectionCard>
+      </div>
     </div>
   );
 }

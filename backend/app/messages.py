@@ -61,6 +61,7 @@ async def post_order_message(
         order_id=order.id,
         buyer_id=order.buyer_id,
         provider_id=order.provider_id,
+        sender_id=current_user.id,
         content=payload.content.strip(),
     )
     db.add(message)

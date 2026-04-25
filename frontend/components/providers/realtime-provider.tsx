@@ -15,6 +15,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const socketRef = useRef<WebSocket | null>(null);
+  const reconnectAttempts = useRef(0);
 
   useEffect(() => {
     if (!user) {
@@ -36,16 +37,23 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (!response.ok || cancelled) {
+          scheduleReconnect();
           return;
         }
 
         const payload = (await response.json()) as { wsUrl: string };
         if (!payload.wsUrl) {
+          scheduleReconnect();
           return;
         }
 
         const socket = new WebSocket(payload.wsUrl);
         socketRef.current = socket;
+
+        socket.onopen = () => {
+          reconnectAttempts.current = 0; // Reset attempts on successful connection
+          queryClient.invalidateQueries(); // Refresh data as we might have missed events while disconnected
+        };
 
         socket.onmessage = (messageEvent) => {
           try {
@@ -57,21 +65,26 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         };
 
         socket.onclose = () => {
-          if (cancelled) {
-            return;
+          if (!cancelled) {
+            scheduleReconnect();
           }
-
-          reconnectTimer = window.setTimeout(() => {
-            connect();
-          }, 2500);
         };
       } catch {
         if (!cancelled) {
-          reconnectTimer = window.setTimeout(() => {
-            connect();
-          }, 2500);
+          scheduleReconnect();
         }
       }
+    }
+
+    function scheduleReconnect() {
+      if (cancelled) return;
+      
+      const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempts.current), 30000); // Max 30s
+      reconnectAttempts.current += 1;
+      
+      reconnectTimer = window.setTimeout(() => {
+        connect();
+      }, delay);
     }
 
     function handleEvent(event: EventPayload) {

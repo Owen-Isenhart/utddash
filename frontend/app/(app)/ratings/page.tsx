@@ -7,6 +7,8 @@ import { queryKeys } from "@/lib/query-keys";
 import type { Order, Rating } from "@/lib/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function RatingsPage() {
   const { user } = useAuth();
@@ -42,14 +44,12 @@ export default function RatingsPage() {
         throw new Error("Pick a completed order to rate");
       }
 
-      return (
-      ratingsApi.create({
+      return ratingsApi.create({
         order_id: Number(formState.orderId),
         ratee_id: Number(rateeId),
         rating: Number(formState.rating),
         comment: formState.comment,
-      })
-      );
+      });
     },
     onSuccess: async () => {
       setFormState({ orderId: "", rating: "5", comment: "" });
@@ -62,79 +62,87 @@ export default function RatingsPage() {
   });
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-slate-900">Ratings</h1>
-      {error ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Ratings</h1>
+      </div>
+      
+      {error ? <p className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-medium text-danger">{error}</p> : null}
 
-      <SectionCard title="Leave Rating">
-        <p className="mb-3 text-sm text-slate-600">
-          Rate the other participant only after an order is completed.
-        </p>
+      <SectionCard title="Leave Rating" description="Rate the other participant after an order is completed">
         <form
-          className="grid gap-3 md:grid-cols-2"
+          className="grid gap-4 md:grid-cols-2"
           onSubmit={(event) => {
             event.preventDefault();
             createRating.mutate();
           }}
         >
-          <select
-            value={formState.orderId}
-            onChange={(event) => setFormState((old) => ({ ...old, orderId: event.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 md:col-span-2"
-          >
-            <option value="">Select completed order</option>
-            {completedOrders.map((order) => (
-              <option key={order.id} value={order.id}>
-                #{order.id} - {order.location}
-              </option>
-            ))}
-          </select>
+          <div className="md:col-span-2 space-y-2">
+            <label className="text-sm font-medium text-foreground">Order</label>
+            <select
+              value={formState.orderId}
+              onChange={(event) => setFormState((old) => ({ ...old, orderId: event.target.value }))}
+              className="flex h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              <option value="">Select completed order</option>
+              {completedOrders.map((order) => (
+                <option key={order.id} value={order.id}>
+                  #{order.id} - {order.location}
+                </option>
+              ))}
+            </select>
+            {rateeId && <p className="text-sm text-muted-foreground mt-1">Rating user ID: {rateeId}</p>}
+          </div>
 
-          <p className="text-sm text-slate-600 md:col-span-2">
-            Rating user ID: {rateeId ?? "-"}
-          </p>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Rating</label>
+            <select
+              value={formState.rating}
+              onChange={(event) => setFormState((old) => ({ ...old, rating: event.target.value }))}
+              className="flex h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+            </select>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Comment</label>
+            <Input
+              placeholder="Optional feedback"
+              value={formState.comment}
+              onChange={(event) => setFormState((old) => ({ ...old, comment: event.target.value }))}
+            />
+          </div>
 
-          <select
-            value={formState.rating}
-            onChange={(event) => setFormState((old) => ({ ...old, rating: event.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          >
-            <option value="5">5</option>
-            <option value="4">4</option>
-            <option value="3">3</option>
-            <option value="2">2</option>
-            <option value="1">1</option>
-          </select>
-          <input
-            placeholder="Comment"
-            value={formState.comment}
-            onChange={(event) => setFormState((old) => ({ ...old, comment: event.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          />
-          <button
+          <Button
             type="submit"
-            disabled={createRating.isPending}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-white disabled:opacity-60 md:col-span-2"
+            className="md:col-span-2 mt-2"
+            isLoading={createRating.isPending}
           >
-            {createRating.isPending ? "Submitting..." : "Submit rating"}
-          </button>
+            Submit rating
+          </Button>
         </form>
       </SectionCard>
 
       <SectionCard title="My Ratings">
         {ratingsQuery.data?.length ? (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {ratingsQuery.data.map((rating) => (
-              <li key={rating.id} className="rounded-lg border border-slate-200 p-2 text-sm">
-                <p>
-                  Order #{rating.order_id} • {rating.rating}/5
-                </p>
-                {rating.comment ? <p className="text-slate-600">{rating.comment}</p> : null}
+              <li key={rating.id} className="rounded-xl border border-border bg-surface-2 p-4 text-sm">
+                <div className="flex justify-between mb-1">
+                  <p className="font-semibold text-foreground">Order #{rating.order_id}</p>
+                  <p className="font-bold text-brand">{rating.rating} / 5</p>
+                </div>
+                {rating.comment ? <p className="text-muted-foreground">{rating.comment}</p> : null}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-slate-500">No ratings yet.</p>
+          <p className="text-sm text-muted-foreground">No ratings yet.</p>
         )}
       </SectionCard>
     </div>

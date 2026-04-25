@@ -9,6 +9,7 @@ import { ordersApi } from "@/lib/api-client";
 import type { Order } from "@/lib/types";
 
 // Fix for default Leaflet icon paths in Next.js
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -60,6 +61,7 @@ export default function OrderMapInner({ order, isProvider }: { order: Order; isP
 
   useEffect(() => {
     if (order.provider_lat !== null && order.provider_lng !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalProviderLoc({ lat: order.provider_lat, lng: order.provider_lng });
     }
   }, [order.provider_lat, order.provider_lng]);
@@ -75,6 +77,7 @@ export default function OrderMapInner({ order, isProvider }: { order: Order; isP
     if (mapRef.current && hasProviderLocation) {
       mapRef.current.setView(center, mapRef.current.getZoom());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center[0], center[1], hasProviderLocation]);
 
   return (
