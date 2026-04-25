@@ -1,11 +1,15 @@
 from datetime import datetime, timedelta
 import secrets
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.app.auth import get_current_user
-from backend.app.config import QR_TOKEN_TTL_MINUTES
+from backend.app.config import (
+    PAGINATION_DEFAULT_LIMIT,
+    PAGINATION_MAX_LIMIT,
+    QR_TOKEN_TTL_MINUTES,
+)
 from backend.app.database import get_db
 from backend.app.models.order import Order, OrderStatus
 from backend.app.models.user import User, UserRole
@@ -65,22 +69,43 @@ def create_order(
 
 @router.get("/", response_model=list[OrderSchema])
 def get_orders(
+    limit: int = Query(PAGINATION_DEFAULT_LIMIT, ge=1, le=PAGINATION_MAX_LIMIT),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     if current_user.role == UserRole.BUYER:
-        return db.query(Order).filter(Order.buyer_id == current_user.id).all()
+        return (
+            db.query(Order)
+            .filter(Order.buyer_id == current_user.id)
+            .order_by(Order.updated_at.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
     if current_user.role == UserRole.PROVIDER:
-        return db.query(Order).filter(Order.provider_id == current_user.id).all()
+        return (
+            db.query(Order)
+            .filter(Order.provider_id == current_user.id)
+            .order_by(Order.updated_at.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
     return (
         db.query(Order)
         .filter((Order.buyer_id == current_user.id) | (Order.provider_id == current_user.id))
+        .order_by(Order.updated_at.desc())
+        .offset(offset)
+        .limit(limit)
         .all()
     )
 
 
 @router.get("/open", response_model=list[OrderSchema])
 def get_open_orders(
+    limit: int = Query(PAGINATION_DEFAULT_LIMIT, ge=1, le=PAGINATION_MAX_LIMIT),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -91,12 +116,16 @@ def get_open_orders(
         db.query(Order)
         .filter(Order.status == OrderStatus.REQUESTED, Order.provider_id.is_(None))
         .order_by(Order.created_at.desc())
+        .offset(offset)
+        .limit(limit)
         .all()
     )
 
 
 @router.get("/me", response_model=list[OrderSchema])
 def get_my_orders(
+    limit: int = Query(PAGINATION_DEFAULT_LIMIT, ge=1, le=PAGINATION_MAX_LIMIT),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -104,6 +133,8 @@ def get_my_orders(
         db.query(Order)
         .filter((Order.buyer_id == current_user.id) | (Order.provider_id == current_user.id))
         .order_by(Order.updated_at.desc())
+        .offset(offset)
+        .limit(limit)
         .all()
     )
 

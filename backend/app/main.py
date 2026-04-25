@@ -8,7 +8,7 @@ from backend.app.orders import router as orders_router
 from backend.app.ratings import router as ratings_router
 from backend.app.messages import router as messages_router
 from backend.app.notifications import router as notifications_router
-from backend.app.config import ALGORITHM, SECRET_KEY
+from backend.app.config import ALGORITHM, CORS_ALLOWED_ORIGINS, SECRET_KEY
 from backend.app.database import Base, engine
 from backend.app.models import user, order, rating, notification, message
 from backend.app.realtime import manager
@@ -20,7 +20,7 @@ app = FastAPI(title="UTDDash API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

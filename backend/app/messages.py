@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.app.auth import get_current_user
@@ -9,6 +9,7 @@ from backend.app.models.user import User
 from backend.app.schemas.messages import Message as MessageSchema
 from backend.app.schemas.messages import MessageCreate
 from backend.app.realtime import emit_user_event
+from backend.app.config import PAGINATION_DEFAULT_LIMIT, PAGINATION_MAX_LIMIT
 
 router = APIRouter()
 
@@ -27,6 +28,8 @@ def _get_order_for_participant(db: Session, order_id: int, current_user: User) -
 @router.get("/{order_id}", response_model=list[MessageSchema])
 def get_order_messages(
     order_id: int,
+    limit: int = Query(PAGINATION_DEFAULT_LIMIT, ge=1, le=PAGINATION_MAX_LIMIT),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -35,6 +38,8 @@ def get_order_messages(
         db.query(Message)
         .filter(Message.order_id == order_id)
         .order_by(Message.created_at.asc())
+        .offset(offset)
+        .limit(limit)
         .all()
     )
 

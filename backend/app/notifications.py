@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.app.auth import get_current_user
@@ -9,12 +9,15 @@ from backend.app.schemas.notification import (
     Notification as NotificationSchema,
     NotificationReadUpdate,
 )
+from backend.app.config import PAGINATION_DEFAULT_LIMIT, PAGINATION_MAX_LIMIT
 
 router = APIRouter()
 
 
 @router.get("/", response_model=list[NotificationSchema])
 def get_my_notifications(
+    limit: int = Query(PAGINATION_DEFAULT_LIMIT, ge=1, le=PAGINATION_MAX_LIMIT),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -22,8 +25,24 @@ def get_my_notifications(
         db.query(Notification)
         .filter(Notification.user_id == current_user.id)
         .order_by(Notification.created_at.desc())
+        .offset(offset)
+        .limit(limit)
         .all()
     )
+
+
+@router.post("/read-all")
+def mark_all_notifications_read(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    updated_count = (
+        db.query(Notification)
+        .filter(Notification.user_id == current_user.id, Notification.is_read.is_(False))
+        .update({Notification.is_read: True}, synchronize_session=False)
+    )
+    db.commit()
+    return {"updated": updated_count}
 
 
 @router.patch("/{notification_id}", response_model=NotificationSchema)
