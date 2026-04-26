@@ -140,6 +140,8 @@ def build_users(db, total_users: int, password: str) -> list[User]:
     users: list[User] = []
 
     demo_users = [
+        ("buyer@utdallas.edu", "Main Buyer", UserRole.BUYER),
+        ("provider@utdallas.edu", "Main Provider", UserRole.PROVIDER),
         ("demo_buyer1@utdallas.edu", "Demo Buyer One", UserRole.BUYER),
         ("demo_buyer2@utdallas.edu", "Demo Buyer Two", UserRole.BUYER),
         ("demo_provider1@utdallas.edu", "Demo Provider One", UserRole.PROVIDER),
@@ -150,6 +152,7 @@ def build_users(db, total_users: int, password: str) -> list[User]:
 
     for email, full_name, role in demo_users:
         lat, lng = random_coord()
+        token_balance = 500.0 if email in ("buyer@utdallas.edu", "provider@utdallas.edu") else round(random.uniform(500, 1600), 2)
         users.append(
             User(
                 email=email,
@@ -160,7 +163,7 @@ def build_users(db, total_users: int, password: str) -> list[User]:
                 venmo_handle=full_name.lower().replace(" ", "_") + "_venmo",
                 cashapp_handle="$" + full_name.lower().replace(" ", ""),
                 zelle_handle=email,
-                token_balance=round(random.uniform(500, 1600), 2),
+                token_balance=token_balance,
                 current_lat=lat,
                 current_lng=lng,
             )
@@ -291,6 +294,7 @@ def build_messages(db, orders: list[Order]) -> list[Message]:
                     order_id=order.id,
                     buyer_id=order.buyer_id,
                     provider_id=order.provider_id,
+                    sender_id=random.choice([order.buyer_id, order.provider_id]),
                     content=random.choice(MESSAGE_TEMPLATES),
                     created_at=order.created_at + timedelta(minutes=random.randint(1, 180)),
                 )
