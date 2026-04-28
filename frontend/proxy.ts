@@ -12,7 +12,7 @@ const protectedPaths = [
 
 const authPages = ["/login", "/register"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
   const pathname = request.nextUrl.pathname;
 
